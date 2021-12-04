@@ -53,7 +53,7 @@ UserSchema.methods.toProfileJSONFor = function(user){
   return {
     username: this.username,
     bio: this.bio,
-    image: this.image || 'https://static.productionready.io/images/smiley-cyrus.jpg',
+    image: this.image || 'https://i.imgur.com/0j9huTT.jpeg',
     following: user ? user.isFollowing(this._id) : false
   };
 };
