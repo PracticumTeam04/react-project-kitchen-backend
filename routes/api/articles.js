@@ -13,7 +13,6 @@ router.param('article', function(req, res, next, slug) {
       if (!article) { return res.sendStatus(404); }
 
       req.article = article;
-
       return next();
     }).catch(next);
 });
@@ -129,6 +128,8 @@ router.post('/', auth.required, function(req, res, next) {
     var article = new Article(req.body.article);
 
     article.author = user;
+    article.image = 'image-link'
+    console.log({ articleToSave: JSON.stringify(article)});
 
     return article.save().then(function(){
       console.log(article.author);
