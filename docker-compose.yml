@@ -8,6 +8,8 @@ services:
       - "3000:3000"
     depends_on:
       - mongo
+    volumes:
+      - ./public/uploads:/usr/src/app/public/uploads
   mongo:
     image: mongo
     volumes:

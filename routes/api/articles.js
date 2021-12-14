@@ -1,5 +1,7 @@
 var router = require('express').Router();
 var mongoose = require('mongoose');
+const { HOST } = require('../../config');
+const { saveArticleImage } = require('../../controllers/articles');
 var Article = mongoose.model('Article');
 var Comment = mongoose.model('Comment');
 var User = mongoose.model('User');
@@ -121,14 +123,13 @@ router.get('/feed', auth.required, function(req, res, next) {
   });
 });
 
-router.post('/', auth.required, function(req, res, next) {
+router.post('/', auth.required, saveArticleImage, function(req, res, next) {
   User.findById(req.payload.id).then(function(user){
     if (!user) { return res.sendStatus(401); }
-
-    var article = new Article(req.body.article);
+    var article = new Article(req.body);
 
     article.author = user;
-    article.image = 'image-link'
+    article.image = res.locals.fileUrl || '';
     console.log({ articleToSave: JSON.stringify(article)});
 
     return article.save().then(function(){
