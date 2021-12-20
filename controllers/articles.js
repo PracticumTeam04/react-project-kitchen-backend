@@ -2,11 +2,11 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const {
-  ARTICLE_IMAGE_FIELDNAME,
-  UPLOAD_FILE_FOLDER,
   HOST,
 } = require('../config');
-const { upload } = require('../utils/file-uploader');
+const { articleImageUpload } = require('../utils/article-image-uploader');
+const UPLOAD_FILE_FOLDER = process.env.UPLOAD_FILE_FOLDER || '/usr/src/app/public/uploads';
+const ARTICLE_IMAGE_FIELDNAME = 'article-image';
 
 const createHash = (req, res, next) => {
   if(!req.file) {
@@ -32,7 +32,7 @@ const writeFile = (req, res, next) => {
     const fileName =
       res.locals.fileHash + path.extname(req.file.originalname).toLowerCase();
     delete res.locals.fileHash;
-    const uploadPath = __dirname + '/..' + UPLOAD_FILE_FOLDER;
+    const uploadPath = UPLOAD_FILE_FOLDER;
     res.locals.fileUrl = `${HOST}/uploads/${fileName}`;
     const files = fs.readdirSync(uploadPath);
     if (files.includes(fileName)) {
@@ -50,7 +50,7 @@ const writeFile = (req, res, next) => {
 };
 
 module.exports.saveArticleImage = [
-  upload.single(ARTICLE_IMAGE_FIELDNAME),
+  articleImageUpload.single(ARTICLE_IMAGE_FIELDNAME),
   createHash,
   writeFile,
 ];
