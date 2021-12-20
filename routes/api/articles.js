@@ -1,5 +1,8 @@
 var router = require('express').Router();
 var mongoose = require('mongoose');
+const { HOST } = require('../../config');
+const { saveArticleImage } = require('../../controllers/articles');
+const { isJSON } = require('../../utils/utils');
 var Article = mongoose.model('Article');
 var Comment = mongoose.model('Comment');
 var User = mongoose.model('User');
@@ -13,7 +16,6 @@ router.param('article', function(req, res, next, slug) {
       if (!article) { return res.sendStatus(404); }
 
       req.article = article;
-
       return next();
     }).catch(next);
 });
@@ -122,13 +124,20 @@ router.get('/feed', auth.required, function(req, res, next) {
   });
 });
 
-router.post('/', auth.required, function(req, res, next) {
+router.post('/', auth.required, saveArticleImage, function(req, res, next) {
   User.findById(req.payload.id).then(function(user){
     if (!user) { return res.sendStatus(401); }
+    let articleData = req.body.article;
 
-    var article = new Article(req.body.article);
+    if(isJSON(articleData)) {
+      articleData = JSON.parse(articleData);
+    }
+
+    var article = new Article(articleData);
 
     article.author = user;
+    article.image = res.locals.fileUrl || '';
+    console.log({ articleToSave: JSON.stringify(article)});
 
     return article.save().then(function(){
       console.log(article.author);
@@ -150,23 +159,33 @@ router.get('/:article', auth.optional, function(req, res, next) {
 });
 
 // update article
-router.put('/:article', auth.required, function(req, res, next) {
+router.put('/:article', auth.required, saveArticleImage, function(req, res, next) {
+
+  let articleData = req.body.article;
+  if(isJSON(articleData)) {
+    articleData = JSON.parse(articleData);
+  }
+  console.log({payload: req.payload});
   User.findById(req.payload.id).then(function(user){
     if(req.article.author._id.toString() === req.payload.id.toString()){
-      if(typeof req.body.article.title !== 'undefined'){
-        req.article.title = req.body.article.title;
+      if(typeof articleData.title !== 'undefined'){
+        req.article.title = articleData.title;
       }
 
-      if(typeof req.body.article.description !== 'undefined'){
-        req.article.description = req.body.article.description;
+      if(typeof articleData.description !== 'undefined'){
+        req.article.description = articleData.description;
       }
 
-      if(typeof req.body.article.body !== 'undefined'){
-        req.article.body = req.body.article.body;
+      if(typeof articleData.body !== 'undefined'){
+        req.article.body = articleData.body;
       }
 
-      if(typeof req.body.article.tagList !== 'undefined'){
-        req.article.tagList = req.body.article.tagList
+      if(typeof articleData.tagList !== 'undefined'){
+        req.article.tagList = articleData.tagList
+      }
+
+      if(typeof res.locals.fileUrl !== 'undefined') {
+        req.article.image = res.locals.fileUrl;
       }
 
       req.article.save().then(function(article){
