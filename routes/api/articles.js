@@ -159,13 +159,13 @@ router.get('/:article', auth.optional, function(req, res, next) {
 });
 
 // update article
-router.put('/:article', auth.required, function(req, res, next) {
+router.put('/:article', auth.required, saveArticleImage, function(req, res, next) {
 
   let articleData = req.body.article;
   if(isJSON(articleData)) {
     articleData = JSON.parse(articleData);
   }
-
+  console.log({payload: req.payload});
   User.findById(req.payload.id).then(function(user){
     if(req.article.author._id.toString() === req.payload.id.toString()){
       if(typeof articleData.title !== 'undefined'){
@@ -182,6 +182,10 @@ router.put('/:article', auth.required, function(req, res, next) {
 
       if(typeof articleData.tagList !== 'undefined'){
         req.article.tagList = articleData.tagList
+      }
+
+      if(typeof res.locals.fileUrl !== 'undefined') {
+        req.article.image = res.locals.fileUrl;
       }
 
       req.article.save().then(function(article){
