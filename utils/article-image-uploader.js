@@ -2,7 +2,7 @@ const multer = require('multer');
 const path = require('path');
 
 const MAX_FORM_FILES = 1;
-const MAX_MULTIPART_FORM_FIELDS = 10;
+const MAX_MULTIPART_FORM_FIELDS = 1;
 const MAX_FILE_SIZE = 5e6;
 const fileTypesReg = /jpeg|jpg|png|gif/;
 
